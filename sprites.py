@@ -13,11 +13,12 @@ class Player(Sprite):
         Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(YELLOW)
+        self.image.fill(BLUE)
         self.rect = self.image.get_rect()
         self.vx, self.vy = 0, 0
         self.x = x * TILESIZE
         self.y = y * TILESIZE
+        self.hitpoints = 100
 
     # def move(self, dx=0, dy=0):
     #     self.x += dx
@@ -37,6 +38,21 @@ class Player(Sprite):
         if self.vx != 0 and self.vy != 0:
             self.vx *= 0.7071
             self.vy *= 0.7071
+
+    def collide_with_obj(self, group, kill, desc):
+        hits = pg.sprite.spritecollide(self, group, kill)
+        if hits and desc == "food":
+            print("I collided with food")
+            self.image.fill(GREEN)
+        if hits and desc == "powerup":
+            print("I collided with powerup")
+            self.image.fill(GREEN)
+        if hits and desc == "mob":
+            print("I collided with mob")
+            self.image.fill(GREEN)
+            self.hitpoints -= 10
+
+
     def collide_with_walls(self, dir):
         if dir == 'x':
             hits = pg.sprite.spritecollide(self, self.game.walls, False)
@@ -56,7 +72,7 @@ class Player(Sprite):
                     self.y = hits[0].rect.bottom
                 self.vy = 0
                 self.rect.y = self.y
-
+            
 
     def update(self):
         # self.rect.x = self.x * TILESIZE
@@ -70,6 +86,11 @@ class Player(Sprite):
         self.rect.y = self.y
         # add y collision later
         self.collide_with_walls('y')
+        self.collide_with_obj(self.game.power_ups, True, "powerup")
+        self.collide_with_obj(self.game.foods, True, "food")
+        self.collide_with_obj(self.game.mobs, True, "mob")
+        self.rect.width = self.rect.width
+        self.rect.height = self.rect.height
         
 
 class Wall(Sprite):
@@ -78,17 +99,19 @@ class Wall(Sprite):
         Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(YELLOW)
+        self.image.fill(WHITE)
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
+
+
 class PowerUp(Sprite):
     def __init__(self, game, x, y):
         # add powerup groups later....
-        self.groups = game.all_sprites
+        self.groups = game.all_sprites, game.power_ups
         Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
@@ -99,5 +122,30 @@ class PowerUp(Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
-class enemy(Sprite):
-    def __init__(self, game, x, y)
+class Food(Sprite):
+    def __init__(self, game, x, y):
+        # add powerup groups later....
+        self.groups = game.all_sprites, game.foods
+        Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(LIGHTGREY)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
+class Mob(Sprite):
+    def __init__(self, game, x, y):
+        # add powerup groups later....
+        self.groups = game.all_sprites, game.mobs
+        Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(DARKRED)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
